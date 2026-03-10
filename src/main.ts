@@ -6,16 +6,25 @@ process.env.TZ = 'America/Argentina/Buenos_Aires';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.enableCors({
+    origin: [
+      'https://turnero-cipbyte.vercel.app'
+    ],
+    credentials: true,
+  });
+
   const config = new DocumentBuilder()
     .addBearerAuth()
-    .setTitle('Signo Médico Turnero Web')
+    .setTitle('Cipbyte Turnero Web')
     .setDescription('Api turnero')
     .setVersion('1.0')
     .addTag('turnero')
     .build();
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
-  app.enableCors();
-  await app.listen(3000);
+
+  await app.listen(process.env.PORT || 3000);
 }
 bootstrap();
