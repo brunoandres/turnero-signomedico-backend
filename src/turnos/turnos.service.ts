@@ -94,7 +94,7 @@ export class TurnosService {
   async findAllAtendiendo(): Promise<Turno[]> {
     const today = new Date();
     const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    return this.turnoModel.find({ estado: 'atendiendo', fecha: { $gte: startOfDay } }).sort({ horaAtencion: -1 }).populate('sector').populate('user').exec();
+    return this.turnoModel.find({ estado: 'atendiendo', fecha: { $gte: startOfDay } }).sort({ horaAtencion: -1 }).populate('sector').populate('afiliadoId', 'nombre apellido dni').populate('user').exec();
   }
 
   // Retorna los turnos en estado finalizados
