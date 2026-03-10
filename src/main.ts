@@ -8,8 +8,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = new DocumentBuilder()
     .addBearerAuth()
-    .setTitle('Turnero MSCB')
-    .setDescription('Api turnero atención contribuyentes')
+    .setTitle('Signo Médico Turnero Web')
+    .setDescription('Api turnero')
     .setVersion('1.0')
     .addTag('turnero')
     .build();
