@@ -7,48 +7,43 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Turno } from '../turnos/schemas/turnos.schema';
 import { Model } from 'mongoose';
 
-@WebSocketGateway(82, {
-  cors: { origin: '*' },
+@WebSocketGateway({
+  cors: {
+    origin: ['https://turnero-cipbyte.vercel.app'],
+    credentials: true,
+  },
 })
-export class TurnosGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+export class TurnosGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
-  //constructor(private turnoService: TurnosService) {}
+  @WebSocketServer()
+  server: Server;
 
-  @WebSocketServer() server: Server;
-
-  async handleConnection(client: any, ...args: any[]) {
-    /*const count = await this.turnoService.countDocuments();
-    if (count === 0) {
-      this.server.emit('database-empty', { message: 'The database is currently empty' });
-    }*/
+  async handleConnection(client: Socket) {
     console.log(`Cliente conectado: ${client.id}`);
   }
 
-  handleDisconnect(client: any) {
+  handleDisconnect(client: Socket) {
     console.log(`Cliente desconectado: ${client.id}`);
   }
 
   afterInit(server: Server) {
-    console.log('Servidor WebSocket iniciado:');
+    console.log('Servidor WebSocket iniciado');
   }
 
   enviarActualizacion(turnos: any) {
-    //console.log('recibiendo actualización: ', turnos)
-    this.server.to('actualizacion-turnos');
+    this.server.emit('actualizacion-turnos', turnos);
   }
 
-  @SubscribeMessage('event_message') //TODO Backend
-  handleIncommingMessage(
-    client: Socket,
-    id: { id: string },
-  ) {
-    this.server.to('Enviando actualización desde el backend').emit('new_message');
+  @SubscribeMessage('event_message')
+  handleIncommingMessage(client: Socket, payload: any) {
+    this.server.emit('new_message', payload);
   }
 
   @SubscribeMessage('catch-error')
   handleCatchError(client: Socket, payload: any): void {
     try {
-      // Hacer algo aquí que pueda generar un error
+      // lógica
     } catch (error) {
       client.emit('error', { message: 'Ocurrió un error en el servidor' });
     }
