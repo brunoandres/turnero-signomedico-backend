@@ -22,7 +22,7 @@ export class TurnosService {
 
   @WebSocketServer() server: Server;
 
-  countDocuments(): any{
+  countDocuments(): any {
     return this.turnoModel.countDocuments();
   }
 
@@ -30,18 +30,8 @@ export class TurnosService {
     try {
       const createdTurno = new this.turnoModel(createTurno);
       const nuevoTurno = await (await createdTurno.save()).populate('sector');
-      this.turnosGateway.server.emit('actualizacion-turnos',nuevoTurno);
+      this.turnosGateway.server.emit('actualizacion-turnos', nuevoTurno);
       return nuevoTurno
-    
-      /*let nuevoTurno: Turno;
-      (await createdTurno.save()).populate('sector').then(turno => {
-        nuevoTurno = turno
-        //Emito un evento con el turno creado
-        this.turnosGateway.server.emit('actualizacion-turnos',turno);
-        return nuevoTurno;
-      })*/
-      
-
     } catch (error) {
       throw new HttpException(error, 400, { cause: new Error("Error create") });
     }
@@ -62,7 +52,7 @@ export class TurnosService {
       updateTurno.horaAtencion = new Date();
       updateTurno.demoraAtencion = diferenciaEnMinutos;
       atender = true;
-      
+
     }
     if (updateTurno.estado.toUpperCase() == 'FINALIZADO') {
       const minutosAtendidos = Math.round(
@@ -72,12 +62,16 @@ export class TurnosService {
       updateTurno.duracionAtencion = minutosAtendidos;
     }
     try {
-      const objetoActualizado = await this.turnoModel.findByIdAndUpdate(id, updateTurno, { new: true }).populate('sector');
+      const objetoActualizado = await this.turnoModel
+        .findByIdAndUpdate(id, updateTurno, { new: true })
+        .populate('sector')
+        .populate('afiliadoId', 'nombre apellido dni');
 
-      //Emito un evento con el turno actualizado
-      this.turnosGateway.server.emit('actualizacion-turnos',objetoActualizado);
+      // Emite evento con el turno actualizado
+      this.turnosGateway.server.emit('actualizacion-turnos', objetoActualizado);
 
-      this.turnosGateway.server.emit('atender-turno',{atender, objetoActualizado});
+      this.turnosGateway.server.emit('atender-turno', { atender, objetoActualizado });
+
       return objetoActualizado;
     } catch (error) {
       console.error(error);
@@ -133,7 +127,7 @@ export class TurnosService {
     //return await this.turnoModel.find({ sector: id, estado: {$ne : 'finalizado'}  }).populate('sector').populate('user').exec();
     const today = new Date();
     const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    return await this.turnoModel.find({ sector: id, fecha: { $gte: startOfDay } }).populate('sector').populate('user').exec();
+    return await this.turnoModel.find({ sector: id, fecha: { $gte: startOfDay } }).populate('afiliadoId').populate('sector').populate('user').exec();
   }
 
   // Retorna los turnos por usuario
@@ -177,8 +171,8 @@ export class TurnosService {
     return await this.turnoModel.countDocuments({ estado: 'pendiente', 'sector': turno.sector, fecha: { $gte: startOfDay } }).populate('sector').exec();
   }
 
-  async deleteTurnos(id: string){
-    return await this.turnoModel.findOneAndDelete({id: id});
+  async deleteTurnos(id: string) {
+    return await this.turnoModel.findOneAndDelete({ id: id });
   }
 
 }
