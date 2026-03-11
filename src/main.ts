@@ -9,7 +9,7 @@ async function bootstrap() {
 
   app.enableCors({
     origin: [
-      'https://turnero-cipbyte.vercel.app'
+      process.env.ORIGIN
     ],
     credentials: true,
   });
