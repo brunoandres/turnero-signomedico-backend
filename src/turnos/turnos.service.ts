@@ -101,7 +101,7 @@ export class TurnosService {
   async findAllFinalizados(sector: string): Promise<Turno[]> {
     const today = new Date();
     const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    return this.turnoModel.find({ estado: 'finalizado', fecha: { $gte: startOfDay }, sector: sector }).sort({ horaAtencion: -1 }).populate('sector').populate('user').exec();
+    return this.turnoModel.find({ estado: 'finalizado', fecha: { $gte: startOfDay }, sector: sector }).sort({ horaAtencion: -1 }).populate('sector').populate('afiliadoId', 'nombre apellido dni').populate('user').exec();
   }
 
   async findTurnoById(id: string): Promise<Turno> {
